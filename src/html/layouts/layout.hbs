@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>{{settings.title}}</title>
+
+  <meta name="description" content="{{settings.description}}" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <link href="css/main.css" rel="stylesheet">
+</head>
+
+<body>
+
+  {{> header/index }}
+
+  {{#block "content"}}{{/block}}
+
+  <footer>
+  </footer>
+
+  <script src="js/bundle-min.js"></script>
+</body>
+
+</html>
