@@ -2,5 +2,36 @@
   "settings": {
     "title": "Site title",
     "description": "Site description"
-  }
+  },
+  "nav": [
+    {
+      "title": "Link",
+      "href": "#",
+      "megamenu": true,
+      "children": [
+        {
+          "title": "First Tier",
+          "href": "#",
+          "children": [
+            {
+              "title": "Second Tier",
+              "href": "#",
+              "children": [
+                {
+                  "title": "Third Tier",
+                  "href": "#",
+                  "children": [
+                    {
+                      "title": "Fourth Tier",
+                      "href": "#"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
 }

@@ -1,0 +1,17 @@
+.megamenu {
+  &__items {
+    display: none;
+    list-style: none;
+    padding: 0;
+
+    &.active {
+      display: block;
+    }
+  }
+
+  &__link {
+    display: block;
+    padding: 1rem;
+    background: green;
+  }
+}

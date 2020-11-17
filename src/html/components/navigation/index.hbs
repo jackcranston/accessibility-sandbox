@@ -1,0 +1,16 @@
+<nav id="nav">
+  <ul class="menu" role="menu">
+    {{#each nav as |navitem|}}
+    {{#if navitem.megamenu}}
+    <li class="menu__item megamenu__item">
+      <a href="#" class="menu__link megamenu__link" role="menuitem">Link</a>
+      {{> navigation/megaMenuList navitem=navitem}}
+    </li>
+    {{else}}
+    <li class="menu__item">
+      <a href="#" class="menu__link" role="menuitem">Link</a>
+    </li>
+    {{/if}}
+    {{/each}}
+  </ul>
+</nav>

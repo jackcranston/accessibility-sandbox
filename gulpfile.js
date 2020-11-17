@@ -92,7 +92,7 @@ const imgTask = () => {
 const watchTask = () => {
 	watch('src/html/**/*.hbs', series(htmlClean, hbsTask));
 	watch('src/scss/**/*.scss', series(sassClean, sassTask));
-	watch('src/js/**/*.js', series(jsClean, jsTask));
+	watch('src/js/**/*.js', series(jsClean, lintTask, jsTask));
 };
 
 /**
