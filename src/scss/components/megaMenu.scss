@@ -1,8 +1,34 @@
 .megamenu {
+  display: none;
+  position: absolute;
+  left: 0;
+  width: 100vw;
+  height: 300px;
+  max-width: $siteWidth;
+  background: #eee;
+  overflow: hidden;
+
+  &.active {
+    display: block;
+  }
+
   &__items {
     display: none;
-    list-style: none;
+    position: absolute;
+    top: 0;
+    left: 100%;
+    width: 100%;
+    height: 100%;
     padding: 0;
+    background: white;
+    list-style: none;
+
+    .megamenu > & {
+      position: relative;
+      left: 0;
+      width: 25%;
+      height: 100%;
+    }
 
     &.active {
       display: block;
@@ -12,6 +38,10 @@
   &__link {
     display: block;
     padding: 1rem;
-    background: green;
+    background: #ddd;
+
+    &:hover {
+      background: #aaa;
+    }
   }
 }

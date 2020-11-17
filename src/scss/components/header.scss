@@ -1,11 +1,20 @@
 #header {
-  .header__logo {
-    width: 20%;
-    margin-right: 2rem;
+  background: #ccc;
 
-    img {
-      width: 100%;
-      height: auto;
+  .header {
+    &__inner {
+      display: flex;
+      position: relative;
+    }
+
+    &__logo {
+      max-width: 150px;
+      margin-right: 2rem;
+
+      img {
+        width: 100%;
+        height: auto;
+      }
     }
   }
 }
