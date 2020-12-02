@@ -3,6 +3,7 @@ export const keyCodes = {
   SPACE: 32,
   TAB: 9,
   UP: 38,
+  ESC: 27,
   RIGHT: 39,
   DOWN: 40,
   LEFT: 37

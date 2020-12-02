@@ -4,7 +4,8 @@ class MegaMenu {
   constructor(megaMenu) {
     this.megaMenu = megaMenu;
     this.megaMenuTrigger = megaMenu.closest('.menu__item--megamenu');
-    this.items = megaMenu.querySelectorAll('.megamenu__item');
+    this.links = megaMenu.querySelectorAll('.megamenu__link');
+    this.itemLists = megaMenu.querySelectorAll('.megamenu__items');
   };
 
   init() {
@@ -16,37 +17,43 @@ class MegaMenu {
    * Make sure everything is set up
    */
   checkElements() {
-    if (!this.items || !this.megaMenuTrigger || !this.megaMenu) false; // !TODO needs extending to all properties
+    if (!this.links || !this.megaMenuTrigger || !this.megaMenu) false; // !TODO needs extending to all properties
   };
 
   addListeners() {
-    const { megaMenu, megaMenuTrigger, items, megaMenuHover, itemHover, handleKeypress} = this;
+    const { megaMenu, megaMenuTrigger, links, itemLists, megaMenuHover, itemHover, handleKeypress } = this;
 
     megaMenuTrigger.addEventListener('mouseenter', (event) => {
-      megaMenuHover(event, megaMenu);
-      itemHover(event);
+      megaMenuHover(event, megaMenu, itemLists);
     });
     megaMenuTrigger.addEventListener('mouseleave', (event) => {
+      megaMenuHover(event, megaMenu, itemLists);
+    });
+    megaMenuTrigger.addEventListener('focus', (event) => {
+      megaMenuHover(event, megaMenu, itemLists);
+    });
+    megaMenuTrigger.addEventListener('blur', (event) => {
       megaMenuHover(event, megaMenu);
-      itemHover(event);
     });
     megaMenuTrigger.addEventListener('keyup', handleKeypress);
 
-    items.forEach(item => {
+    links.forEach((item) => {
       item.addEventListener('mouseenter', itemHover);
-      //item.addEventListener('focus', this.itemHover);
-      item.addEventListener('mouseleave', itemHover);
-      //item.addEventListener('blur', this.itemHover);
+      item.addEventListener('focus', itemHover);
+      //item.addEventListener('mouseleave', itemHover);
+      item.addEventListener('blur', itemHover);
       item.addEventListener('keyup', handleKeypress);
     });
   };
 
-  megaMenuHover(event, megaMenu) {
+  megaMenuHover(event, megaMenu, itemLists) {
     const { type } = event;
 
     if ((type === 'mouseenter' || type === 'focus') && !megaMenu.classList.contains('active')) {
       megaMenu.classList.add('active');
       megaMenu.setAttribute('aria-hidden', false);
+      itemLists[0].classList.add('active');
+      itemLists[0].setAttribute('aria-hidden', false);
     }
     if ((type === 'mouseleave' || type === 'blur') && megaMenu.classList.contains('active')) {
       megaMenu.classList.remove('active');
@@ -56,30 +63,75 @@ class MegaMenu {
 
   itemHover(event) {
     const { type, currentTarget } = event;
-    const subMenu = currentTarget.querySelector('.megamenu__items');
+    const parentList = currentTarget.closest('.megamenu__items');
+    const nextSubMenu = parentList.querySelector('.megamenu__items');
+    const prevLink = parentList.querySelector('.active');
 
-    if(!subMenu) return;
+    if (prevLink) {
+      const prevSubMenus = prevLink.querySelectorAll('.megamenu__items');
 
-    if ((type === 'mouseenter' || type === 'focus') && !subMenu.classList.contains('active')) {
-      subMenu.classList.add('active');
-      subMenu.setAttribute('aria-hidden', false);
+      prevSubMenus.forEach((prevSubMenu) => {
+        prevSubMenu.classList.remove('active');
+        prevSubMenu.setAttribute('aria-hidden', true);
+      });
     }
-    if ((type === 'mouseleave' || type === 'blur') && subMenu.classList.contains('active')) {
-      subMenu.classList.remove('active');
-      subMenu.setAttribute('aria-hidden', true);
+
+    if (!nextSubMenu) return;
+
+    if ((type === 'mouseenter' || type === 'focus') && !nextSubMenu.classList.contains('active')) {
+      nextSubMenu.classList.add('active');
+      nextSubMenu.setAttribute('aria-hidden', false);
+    }
+    if ((type === 'mouseleave' || type === 'blur') && nextSubMenu.classList.contains('active')) {
+      nextSubMenu.classList.remove('active');
+      nextSubMenu.setAttribute('aria-hidden', true);
     }
   };
 
+  closeMegaMenu() {
+    const { megaMenu, itemLists } = this;
+
+    if (megaMenu.classList.contains('active')) {
+      megaMenu.classList.remove('active');
+      megaMenu.setAttribute('aria-hidden', true);
+    }
+  
+    itemLists.forEach(itemList => {
+      if (itemList.classList.contains('active')) {
+        itemList.classList.remove('active');
+        itemList.setAttribute('aria-hidden', true);
+      }
+    });
+  };
+
+
   handleKeypress(event) {
+    const { closeMegaMenu } = this;
+    const { currentTarget } = event;
     const keyPressed = getKeypress(event);
+    const currentItem = currentTarget.closest('.megamenu__item');
 
     switch (keyPressed) {
       case 'UP':
+        currentItem.previousElementSibling.querySelector('a').focus();
         break;
-      // ARROW - CONTROL DIRECTION / FLOW
-      // SPACE - ACTIVE
-      // ENTER - ENTER LINK
-      // TAB - NEXT ITEM IN HERIARCHY
+      case 'DOWN':
+        currentItem.nextElementSibling.querySelector('a').focus();
+        break;
+      case 'RIGHT': 
+        break;
+      case 'LEFT':
+        break;
+      case 'SPACE':
+        break;
+      case 'ENTER':
+        break;
+      case 'TAB':
+        currentItem.nextElementSibling.querySelector('a').focus();
+        break;
+      case 'ESC':
+        closeMegaMenu();
+        break;
     }
   }
 };
