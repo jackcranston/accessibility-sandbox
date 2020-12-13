@@ -1,5 +1,7 @@
 @import 'vars';
-@import 'global.scss';
+@import 'global';
 @import 'layout';
+@import 'functions';
+@import 'mixins';
 
 @import 'components/*.scss';

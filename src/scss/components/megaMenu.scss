@@ -11,22 +11,29 @@
     display: block;
   }
 
-  &__items {
+  &__items,
+  &__content {
     display: none;
     position: absolute;
     top: 0;
-    left: 100%;
     width: 100%;
     height: 100%;
     padding: 0;
-    background: #ddd;
+    background: color(primary, tone2);
     list-style: none;
+
+    @include mq(md) {
+      left: 100%;
+    }
 
     .megamenu > & {
       position: relative;
       left: 0;
-      width: 25%;
       height: 100%;
+
+      @include mq(md) {
+        width: 25%;
+      }
     }
 
     &.active {
@@ -34,14 +41,40 @@
     }
   }
 
+  &__items {
+    &.active {
+      ~ a {
+        background: color(primary, tone3);
+      }
+    }
+  }
+
+  &__content {
+    text-align: center;
+
+    &.active {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+  }
+
+  &__inner {
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__title {
+    margin-bottom: 1rem;
+  }
+
   &__link {
     display: block;
     padding: 1rem;
-    background: #ddd;
 
     &:hover,
     &:focus {
-      background: #aaa;
+      background: color(primary, tone3);
     }
   }
 }

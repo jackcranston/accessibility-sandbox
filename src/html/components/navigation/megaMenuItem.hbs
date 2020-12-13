@@ -3,5 +3,9 @@
   <a href="{{ item.href }}" class="megamenu__link" role="menuitem">{{ item.title }}</a>
   {{#if item.children }}
   {{> navigation/megaMenuList navitem=item }}
+  {{else}}
+  {{#if item.content }}
+  {{> navigation/megaMenuContent }}
+  {{/if}}
   {{/if}}
 </li>

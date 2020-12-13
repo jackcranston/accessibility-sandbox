@@ -1,4 +1,5 @@
 import { getKeypress } from '../helpers/keys';
+import { deviceWidth } from '../helpers/devices';
 
 class MegaMenu {
   constructor(megaMenu) {
@@ -90,7 +91,7 @@ class MegaMenu {
     const { type, currentTarget } = event;
     const parentList = currentTarget.closest('.megamenu__items');
     const parentItem = currentTarget.closest('.megamenu__item');
-    const nextSubMenu = parentItem.querySelector('.megamenu__items');
+    const nextPanel = parentItem.querySelector('.megamenu__items') || parentItem.querySelector('.megamenu__content');
     const activeItems = parentList.querySelectorAll('.active');
 
     activeItems.forEach((activeItem) => {
@@ -98,15 +99,15 @@ class MegaMenu {
       activeItem.setAttribute('aria-hidden', true);
     });
 
-    if (!nextSubMenu) return;
+    if (!nextPanel) return;
 
-    if ((type === 'mouseenter' || type === 'focus') && !nextSubMenu.classList.contains('active')) {
-      nextSubMenu.classList.add('active');
-      nextSubMenu.setAttribute('aria-hidden', false);
+    if ((type === 'mouseenter' || type === 'focus') && !nextPanel.classList.contains('active')) {
+      nextPanel.classList.add('active');
+      nextPanel.setAttribute('aria-hidden', false);
     }
-    if ((type === 'mouseleave' || type === 'blur') && nextSubMenu.classList.contains('active')) {
-      nextSubMenu.classList.remove('active');
-      nextSubMenu.setAttribute('aria-hidden', true);
+    if ((type === 'mouseleave' || type === 'blur') && nextPanel.classList.contains('active')) {
+      nextPanel.classList.remove('active');
+      nextPanel.setAttribute('aria-hidden', true);
     }
   };
 

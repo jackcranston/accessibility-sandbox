@@ -6,6 +6,9 @@
   &__link {
     display: block;
     padding: 1rem;
-    background: red;
+
+    &:hover {
+      background: color(primary, tone2);
+    }
   }
 }

@@ -1,0 +1,21 @@
+$colorPalette: (
+  primary: (
+    tone1: #7400b8,
+    tone2: #6930c3,
+    tone3: #5e60ce,
+  ),
+  secondary: (
+    tone1: #4ea8de,
+    tone2: #48bfe3,
+    tone3: #56cfe1,
+  ),
+  tertiary: (
+    tone1: #64dfdf,
+    tone2: #72efdd,
+    tone3: #80ffdb,
+  ),
+);
+
+@function color($name, $tone) {
+  @return map-get(map-get($colorPalette, $name), $tone);
+}
