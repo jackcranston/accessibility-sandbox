@@ -4,6 +4,6 @@
 
 Requirements for this component:
 
-- Fully accessible (AAA)
+- Fully accessible
 - Responsive
 - Have a multi-panel dropdown

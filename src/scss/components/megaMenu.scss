@@ -3,7 +3,6 @@
   position: absolute;
   left: 0;
   width: 100vw;
-  height: 300px;
   max-width: $siteWidth;
   background: #eee;
   overflow: hidden;
@@ -20,7 +19,7 @@
     width: 100%;
     height: 100%;
     padding: 0;
-    background: white;
+    background: #ddd;
     list-style: none;
 
     .megamenu > & {
@@ -40,7 +39,8 @@
     padding: 1rem;
     background: #ddd;
 
-    &:hover {
+    &:hover,
+    &:focus {
       background: #aaa;
     }
   }

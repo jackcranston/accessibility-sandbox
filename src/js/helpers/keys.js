@@ -6,7 +6,9 @@ export const keyCodes = {
   ESC: 27,
   RIGHT: 39,
   DOWN: 40,
-  LEFT: 37
+  LEFT: 37,
+  HOME: 36,
+  END: 35
 }
 
 export const getKeypress = (event) => {

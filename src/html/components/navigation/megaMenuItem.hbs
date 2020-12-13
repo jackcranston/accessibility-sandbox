@@ -1,7 +1,7 @@
-{{! Recursively display menu items}}
+{{! Recursively display menu items }}
 <li class="megamenu__item">
-  <a href="{{item.href}}" class="megamenu__link" role="menuitem">{{item.title}}</a>
-  {{#if item.children}}
-  {{> navigation/megaMenuList navitem=item}}
+  <a href="{{ item.href }}" class="megamenu__link" role="menuitem">{{ item.title }}</a>
+  {{#if item.children }}
+  {{> navigation/megaMenuList navitem=item }}
   {{/if}}
 </li>

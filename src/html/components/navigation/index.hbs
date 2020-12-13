@@ -1,10 +1,10 @@
 <nav id="nav">
   <ul class="menu" role="menu">
-    {{#each nav as |navitem|}}
-    {{#if navitem.megamenu}}
+    {{#each nav as |navitem| }}
+    {{#if navitem.megamenu }}
     <li class="menu__item menu__item--megamenu">
       <a href="#" class="menu__link" role="menuitem">Link</a>
-      {{> navigation/megaMenu navitem=navitem}}
+      {{> navigation/megaMenu navitem=navitem }}
     </li>
     {{else}}
     <li class="menu__item">
