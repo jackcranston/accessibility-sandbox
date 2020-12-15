@@ -12,9 +12,12 @@ class MegaMenu {
 
     // binds this to avoid scope issues
     this.megaMenuInteraction = this.megaMenuInteraction.bind(this);
-    this.handleKeypress = this.handleKeypress.bind(this);
     this.megaMenuKeypress = this.megaMenuKeypress.bind(this);
+    this.megaMenuOpen = this.megaMenuOpen.bind(this);
+    this.megaMenuClose = this.megaMenuClose.bind(this);
+    this.handleKeypress = this.handleKeypress.bind(this);
     this.handleBackButton = this.handleBackButton.bind(this);
+    this.itemClick = this.itemClick.bind(this);
   };
 
   /**
@@ -49,6 +52,7 @@ class MegaMenu {
     });
 
     this.backButtons.forEach((backButton) => {
+      backButton.addEventListener('keyup', this.handleKeypress);
       backButton.addEventListener('click', this.handleBackButton);
     });
 
@@ -61,7 +65,6 @@ class MegaMenu {
    */
   screenResizeDetection() {
     const device = getDevice();
-    console.log(device);
 
     if (device === 'MOBILE') {
       this.megaMenuTriggerLink.addEventListener('click', this.megaMenuInteraction);
@@ -71,6 +74,8 @@ class MegaMenu {
 
       this.links.forEach((item) => {
         item.removeEventListener('mouseenter', this.itemHover);
+        item.removeEventListener('focus', this.itemHover);
+        item.addEventListener('click', this.itemClick);
       });
     } else if (device === 'DESKTOP') {
       this.megaMenuTriggerLink.removeEventListener('click', this.megaMenuInteraction);
@@ -80,6 +85,8 @@ class MegaMenu {
 
       this.links.forEach((item) => {
         item.addEventListener('mouseenter', this.itemHover);
+        item.addEventListener('focus', this.itemHover);
+        item.removeEventListener('click', this.itemClick);
       });
     }
   }
@@ -100,27 +107,25 @@ class MegaMenu {
   }
 
   /**
-   * @param {HTMLElement} megaMenu
-   * @param {Array} itemLists array of HTMLElements
+   * Opens the megamenu
    */
-  megaMenuOpen(megaMenu, itemLists) {
-    megaMenu.classList.add('active');
-    megaMenu.setAttribute('aria-hidden', false);
-    itemLists[0].classList.add('active');
-    itemLists[0].setAttribute('aria-hidden', false);
+  megaMenuOpen() {
+    this.megaMenu.classList.add('active');
+    this.megaMenu.setAttribute('aria-hidden', false);
+    this.itemLists[0].classList.add('active');
+    this.itemLists[0].setAttribute('aria-hidden', false);
   }
 
   /**
-   * @param {HTMLElement} megaMenu 
-   * @param {Array} itemLists array of HTMLElements
+   * Closes the megamenu and resets the item lists
    */
-  megaMenuClose(megaMenu, itemLists) {
-    if (megaMenu.classList.contains('active')) {
-      megaMenu.classList.remove('active');
-      megaMenu.setAttribute('aria-hidden', true);
+  megaMenuClose() {
+    if (this.megaMenu.classList.contains('active')) {
+      this.megaMenu.classList.remove('active');
+      this.megaMenu.setAttribute('aria-hidden', true);
     }
   
-    itemLists.forEach(itemList => {
+    this.itemLists.forEach(itemList => {
       if (itemList.classList.contains('active')) {
         itemList.classList.remove('active');
         itemList.setAttribute('aria-hidden', true);
@@ -137,11 +142,8 @@ class MegaMenu {
     const { type } = event;
     const device = getDevice();
 
-    console.log(type);
-
     if ((type === 'mouseleave' || type === 'blur' || type === 'click') && this.megaMenu.classList.contains('active')) {
-      this.megaMenu.classList.remove('active');
-      this.megaMenu.setAttribute('aria-hidden', true);
+      this.megaMenuClose();
     } else if (((device === 'DESKTOP') && (type === 'mouseenter' || type === 'focus')) || (device === 'MOBILE' && type === 'click')) {
       this.megaMenuOpen(this.megaMenu, this.itemLists);
     }
@@ -171,12 +173,29 @@ class MegaMenu {
     if ((type === 'mouseenter' || type === 'focus') && !nextPanel.classList.contains('active')) {
       nextPanel.classList.add('active');
       nextPanel.setAttribute('aria-hidden', false);
-    }
-    if ((type === 'mouseleave' || type === 'blur') && nextPanel.classList.contains('active')) {
+    } else if ((type === 'mouseleave' || type === 'blur') && nextPanel.classList.contains('active')) {
       nextPanel.classList.remove('active');
       nextPanel.setAttribute('aria-hidden', true);
     }
   };
+
+  /**
+   * Handles when menu item is clicked
+   * @param {Event} event 
+   */
+  itemClick(event) {
+    const { type, currentTarget } = event;
+    const parentItem = currentTarget.closest('.megamenu__item');
+    const nextPanel = parentItem.querySelector('.megamenu__items') || parentItem.querySelector('.megamenu__content');
+
+    if (!nextPanel) return;
+
+    if (type === 'click' && !nextPanel.classList.contains('active')) {
+      nextPanel.classList.add('active');
+      nextPanel.setAttribute('aria-hidden', false);
+      this.focusChildOfCurrent(parentItem);
+    }
+  }
 
   /**
    * Handles keypress when focused on megamenu root element
@@ -210,7 +229,7 @@ class MegaMenu {
     const { currentTarget } = event;
     const keyPressed = getKeypress(event);
     const currentItem = currentTarget.closest('.megamenu__item');
-
+    
     switch (keyPressed) {
       case 'UP':
         this.focusPrevOfCurrent(currentItem);
@@ -245,7 +264,7 @@ class MegaMenu {
    */
   handleBackButton(event) {
     const { currentTarget } = event;
-    const parentList = currentTarget.closest('.megamenu__items');
+    const parentList = currentTarget.closest('.megamenu__content') || currentTarget.closest('.megamenu__items');
 
     parentList.classList.remove('active');
     parentList.setAttribute('aria-hidden', true);
@@ -256,49 +275,87 @@ class MegaMenu {
     }
   }
 
+  /**
+   * Sets focus to previous item in current list
+   * @param {HTMLElement} currentItem 
+   */
   focusPrevOfCurrent(currentItem) {
     if (!currentItem.previousElementSibling) return;
 
-    const prevItem = currentItem.previousElementSibling.querySelector('.megamenu__link');
+    const prevItem = currentItem.previousElementSibling.querySelector('.megamenu__link') || currentItem.previousElementSibling;
     prevItem.focus();
   };
 
+  /**
+   * Sets focus to next item in current list
+   * @param {HTMLElement} currentItem 
+   */
   focusNextOfCurrent(currentItem) {
     if (!currentItem.nextElementSibling) return;
 
-    const nextItem = currentItem.nextElementSibling.querySelector('.megamenu__link');
+    const nextItem = currentItem.nextElementSibling.querySelector('.megamenu__link') || currentItem.nextElementSibling;
     nextItem.focus();
   };
 
+  /**
+   * Sets focus to first item in current list
+   * @param {HTMLElement} currentItem 
+   */
   focusFirstOfCurrent(currentItem) {
     const currentList = currentItem.closest('.megamenu__items');
-    const currentListLinks = currentList.querySelectorAll(':scope > .megamenu__item > .megamenu__link'); // NOTE: :scope not supported in IE
+    const currentListLinks = currentList.querySelectorAll(':scope > .megamenu__item > .megamenu__link');
 
     currentListLinks[0].focus();
   };
 
+  /**
+   * Sets focus to last item in current list
+   * @param {HTMLElement} currentItem 
+   */
   focusLastOfCurrent(currentItem) {
     const currentList = currentItem.closest('.megamenu__items');
-    const currentListLinks = currentList.querySelectorAll(':scope > .megamenu__item > .megamenu__link'); // NOTE: :scope not supported in IE
+    const currentListLinks = currentList.querySelectorAll(':scope > .megamenu__item > .megamenu__link');
 
     currentListLinks[currentListLinks.length - 1].focus();
   };
 
+  /**
+   * Sets focus to next/inner panel
+   * @param {HTMLElement} currentItem 
+   */
   focusChildOfCurrent(currentItem) {
-    const innerList = currentItem.querySelector('.megamenu__items');
-    if (!innerList) return;
+    const innerPanel = currentItem.querySelector('.megamenu__items') || currentItem.querySelector('.megamenu__content');
+    const device = getDevice();
+    if (!innerPanel) return;
 
-    const innerListLinks = innerList.querySelectorAll(':scope > .megamenu__item > .megamenu__link'); // NOTE: :scope not supported in IE
-    innerListLinks[0].focus();
+    const firstInnerLink = innerPanel.querySelectorAll(':scope > .megamenu__item > .megamenu__link')[0] || innerPanel.querySelector('.button');
+
+    if (device === 'MOBILE') {
+      innerPanel.classList.add('active');
+      innerPanel.setAttribute('aria-hidden', false);
+    }
+
+    firstInnerLink.focus();
   };
 
+  /**
+   * Sets focus to previous/outer panel
+   * @param {HTMLElement} currentItem 
+   */
   focusParentOfCurrent(currentItem) {
-    const currentOuterList = currentItem.closest('.megamenu__items');
-    const prevItem = currentOuterList.closest('.megamenu__item');
-    if (!prevItem) return;
+    const currentOuterPanel = currentItem.closest('.megamenu__content') || currentItem.closest('.megamenu__items');
+    const firstOuterItem = currentOuterPanel.closest('.megamenu__item');
+    const device = getDevice();
+    if (!firstOuterItem) return;
 
-    const prevLink = prevItem.querySelector('.megamenu__link');
-    prevLink.focus();
+    const firstOuterLink = firstOuterItem.querySelector('.megamenu__link');
+
+    if (device === 'MOBILE') {
+      currentOuterPanel.classList.remove('active');
+      currentOuterPanel.setAttribute('aria-hidden', true);
+    }
+
+    firstOuterLink.focus();
   };
 };
 

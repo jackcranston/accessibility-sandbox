@@ -5,10 +5,6 @@ export const getDevice = () => {
       width: 768
     },
     {
-      name: 'TABLET',
-      width: 320
-    },
-    {
       name: 'MOBILE',
       width: 0
     },
