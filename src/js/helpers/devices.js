@@ -1,4 +1,4 @@
-export const deviceWidth = () => {
+export const getDevice = () => {
   const devices = [
     {
       name: 'DESKTOP',
@@ -14,9 +14,11 @@ export const deviceWidth = () => {
     },
   ];
 
-  return devices.find((device) => {
+  const getDevice = devices.find((device) => {
     if (window.matchMedia(`(min-width: ${device.width}px)`).matches) {
       return device.name;
     }
   });
+
+  return getDevice.name;
 };

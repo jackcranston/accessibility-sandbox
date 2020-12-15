@@ -1,5 +1,6 @@
 .container {
   display: flex;
+  position: relative;
   max-width: $siteWidth;
   padding: 0 1rem;
   margin: auto;

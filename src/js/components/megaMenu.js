@@ -1,44 +1,103 @@
 import { getKeypress } from '../helpers/keys';
-import { deviceWidth } from '../helpers/devices';
+import { getDevice } from '../helpers/devices';
 
 class MegaMenu {
   constructor(megaMenu) {
     this.megaMenu = megaMenu;
     this.megaMenuTrigger = megaMenu.closest('.menu__item--megamenu');
+    this.megaMenuTriggerLink = this.megaMenuTrigger.querySelector('.menu__link');
     this.links = [...megaMenu.querySelectorAll('.megamenu__link')];
     this.itemLists = [...megaMenu.querySelectorAll('.megamenu__items')];
+    this.backButtons = [...megaMenu.querySelectorAll('.megamenu__back-button')];
+
+    // binds this to avoid scope issues
+    this.megaMenuInteraction = this.megaMenuInteraction.bind(this);
+    this.handleKeypress = this.handleKeypress.bind(this);
+    this.megaMenuKeypress = this.megaMenuKeypress.bind(this);
+    this.handleBackButton = this.handleBackButton.bind(this);
   };
 
+  /**
+   * Initialises megamenu
+   */
   init() {
     this.checkElements();
     this.addListeners();
   };
 
   /**
-   * Make sure everything is set up
+   * Makes sure all necessary elements exist
    */
   checkElements() {
-    if (!this.links || !this.megaMenuTrigger || !this.megaMenu) false; // TODO needs extending to all properties
+    if (!this.megaMenu || !this.megaMenuTrigger || !this.links.length || !this.itemLists.length ) false;
   };
 
   /**
    * Set event listeners
    */
   addListeners() {
-    const { megaMenuTrigger, links, megaMenuHover, itemHover, itemLeave, handleKeypress, megaMenuKeypress } = this;
+    this.megaMenuTrigger.addEventListener('mouseenter', this.megaMenuInteraction);
+    this.megaMenuTrigger.addEventListener('focus', this.megaMenuInteraction);
+    this.megaMenuTrigger.addEventListener('mouseleave', this.megaMenuInteraction);
+    this.megaMenuTrigger.addEventListener('blur', this.megaMenuInteraction);
+    this.megaMenuTrigger.addEventListener('keyup', this.megaMenuKeypress);
 
-    megaMenuTrigger.addEventListener('mouseenter', megaMenuHover.bind(this));
-    megaMenuTrigger.addEventListener('focus', megaMenuHover.bind(this));
-    megaMenuTrigger.addEventListener('mouseleave', megaMenuHover.bind(this));
-    megaMenuTrigger.addEventListener('blur', megaMenuHover.bind(this));
-    megaMenuTrigger.addEventListener('keyup', megaMenuKeypress.bind(this));
-
-    links.forEach((item) => {
-      item.addEventListener('mouseenter', itemHover);
-      item.addEventListener('focus', itemHover);
-      item.addEventListener('keyup', handleKeypress.bind(this));
+    this.links.forEach((item) => {
+      item.addEventListener('mouseenter', this.itemHover);
+      item.addEventListener('focus', this.itemHover);
+      item.addEventListener('keyup', this.handleKeypress);
     });
+
+    this.backButtons.forEach((backButton) => {
+      backButton.addEventListener('click', this.handleBackButton);
+    });
+
+    this.screenResizeDetection();
+    this.screenResizeEventListener();
   };
+
+  /**
+   * Detects screen size change
+   */
+  screenResizeDetection() {
+    const device = getDevice();
+    console.log(device);
+
+    if (device === 'MOBILE') {
+      this.megaMenuTriggerLink.addEventListener('click', this.megaMenuInteraction);
+
+      this.megaMenuTrigger.removeEventListener('mouseenter', this.megaMenuInteraction);
+      this.megaMenuTrigger.removeEventListener('mouseleave', this.megaMenuInteraction);
+
+      this.links.forEach((item) => {
+        item.removeEventListener('mouseenter', this.itemHover);
+      });
+    } else if (device === 'DESKTOP') {
+      this.megaMenuTriggerLink.removeEventListener('click', this.megaMenuInteraction);
+
+      this.megaMenuTrigger.addEventListener('mouseenter', this.megaMenuInteraction);
+      this.megaMenuTrigger.addEventListener('mouseleave', this.megaMenuInteraction);
+
+      this.links.forEach((item) => {
+        item.addEventListener('mouseenter', this.itemHover);
+      });
+    }
+  }
+
+  /**
+   * Throttled screen resize event listener
+   */
+  screenResizeEventListener() {
+    let throttleResize;
+
+    window.addEventListener('resize', () => {
+      if (!!throttleResize) clearTimeout(throttleResize);
+
+      throttleResize = setTimeout(() => {
+        this.screenResizeDetection();
+      }, 200);
+    })
+  }
 
   /**
    * @param {HTMLElement} megaMenu
@@ -69,17 +128,22 @@ class MegaMenu {
     });
   };
 
-  megaMenuHover(event) {
-    const { megaMenu, itemLists, megaMenuOpen } = this;
+  /**
+   * Handles first megamenu interaction
+   * @param {Event} event 
+   */
+  megaMenuInteraction(event) {
+    event.stopPropagation();
     const { type } = event;
+    const device = getDevice();
 
-    if ((type === 'mouseenter' || type === 'focus') && !megaMenu.classList.contains('active')) {
-      megaMenuOpen(megaMenu, itemLists);
-    }
+    console.log(type);
 
-    if ((type === 'mouseleave' || type === 'blur') && megaMenu.classList.contains('active')) {
-      megaMenu.classList.remove('active');
-      megaMenu.setAttribute('aria-hidden', true);
+    if ((type === 'mouseleave' || type === 'blur' || type === 'click') && this.megaMenu.classList.contains('active')) {
+      this.megaMenu.classList.remove('active');
+      this.megaMenu.setAttribute('aria-hidden', true);
+    } else if (((device === 'DESKTOP') && (type === 'mouseenter' || type === 'focus')) || (device === 'MOBILE' && type === 'click')) {
+      this.megaMenuOpen(this.megaMenu, this.itemLists);
     }
   }
 
@@ -92,12 +156,15 @@ class MegaMenu {
     const parentList = currentTarget.closest('.megamenu__items');
     const parentItem = currentTarget.closest('.megamenu__item');
     const nextPanel = parentItem.querySelector('.megamenu__items') || parentItem.querySelector('.megamenu__content');
-    const activeItems = parentList.querySelectorAll('.active');
+    const activeItems = [...parentList.querySelectorAll('.active')];
 
-    activeItems.forEach((activeItem) => {
-      activeItem.classList.remove('active');
-      activeItem.setAttribute('aria-hidden', true);
-    });
+    // clear any active items before showing next item
+    if (activeItems.length) {
+      activeItems.forEach((activeItem) => {
+        activeItem.classList.remove('active');
+        activeItem.setAttribute('aria-hidden', true);
+      });
+    }
 
     if (!nextPanel) return;
 
@@ -116,20 +183,19 @@ class MegaMenu {
    * @param {Event} event 
    */
   megaMenuKeypress(event) {
-    const { megaMenu, itemLists, megaMenuOpen, megaMenuClose } = this;
     const keyPressed = getKeypress(event);
 
     switch(keyPressed) {
       case 'SPACE':
-        if (!megaMenu.classList.contains('active')) {
-          megaMenuOpen(megaMenu, itemLists);
+        if (!this.megaMenu.classList.contains('active')) {
+          this.megaMenuOpen(this.megaMenu, this.itemLists);
         } else {
-          megaMenuClose(megaMenu, itemLists);
+          this.megaMenuClose(this.megaMenu, this.itemLists);
         }
         break;
       case 'ESC':
-        if (megaMenu.classList.contains('active')) {
-          megaMenuClose(megaMenu, itemLists);
+        if (this.megaMenu.classList.contains('active')) {
+          this.megaMenuClose(this.megaMenu, this.itemLists);
         }
         break;
     }
@@ -141,38 +207,54 @@ class MegaMenu {
    */
   handleKeypress(event) {
     event.stopPropagation();
-    const { megaMenu, itemLists, megaMenuClose, focusPrevOfCurrent, focusNextOfCurrent, focusFirstOfCurrent, focusLastOfCurrent, focusChildOfCurrent, focusParentOfCurrent } = this;
     const { currentTarget } = event;
     const keyPressed = getKeypress(event);
     const currentItem = currentTarget.closest('.megamenu__item');
 
     switch (keyPressed) {
       case 'UP':
-        focusPrevOfCurrent(currentItem);
+        this.focusPrevOfCurrent(currentItem);
         break;
       case 'DOWN':
-        focusNextOfCurrent(currentItem);
+        this.focusNextOfCurrent(currentItem);
         break;
       case 'RIGHT':
-        focusChildOfCurrent(currentItem);
+        this.focusChildOfCurrent(currentItem);
         break;
       case 'LEFT':
-        focusParentOfCurrent(currentItem);
+        this.focusParentOfCurrent(currentItem);
         break;
       case 'SPACE':
-        focusChildOfCurrent(currentItem);
+        this.focusChildOfCurrent(currentItem);
         break;
       case 'ESC':
-        megaMenuClose(megaMenu, itemLists);
+        this.megaMenuClose(this.megaMenu, this.itemLists);
         break;
       case 'HOME':
-        focusFirstOfCurrent(currentItem);
+        this.focusFirstOfCurrent(currentItem);
         break;
       case 'END' :
-        focusLastOfCurrent(currentItem);
+        this.focusLastOfCurrent(currentItem);
         break;
     }
   };
+
+  /**
+   * Returns user to previous menu list
+   * @param {Event} event 
+   */
+  handleBackButton(event) {
+    const { currentTarget } = event;
+    const parentList = currentTarget.closest('.megamenu__items');
+
+    parentList.classList.remove('active');
+    parentList.setAttribute('aria-hidden', true);
+
+    if (parentList.parentElement === this.megaMenu) {
+      this.megaMenu.classList.remove('active');
+      this.megaMenu.setAttribute('aria-hidden', true);
+    }
+  }
 
   focusPrevOfCurrent(currentItem) {
     if (!currentItem.previousElementSibling) return;
