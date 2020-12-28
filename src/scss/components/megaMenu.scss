@@ -21,7 +21,7 @@
     background: color(primary, tone2);
     list-style: none;
 
-    @include mq(md) {
+    @include mq(lg) {
       left: 100%;
     }
 
@@ -30,7 +30,7 @@
       left: 0;
       height: 100%;
 
-      @include mq(md) {
+      @include mq(lg) {
         width: 25%;
       }
     }
@@ -68,6 +68,16 @@
     margin-bottom: 1rem;
   }
 
+  &__item {
+    &--back {
+      margin-top: auto;
+
+      @include mq(lg) {
+        display: none;
+      }
+    }
+  }
+
   &__link {
     display: block;
     padding: 1rem;
@@ -79,16 +89,14 @@
   }
 
   &__back-button {
-    display: block;
     width: 100%;
     padding: 1rem;
     border: 0;
-    margin-top: auto;
     background: color(secondary, tone1);
     color: white;
     text-align: left;
 
-    @include mq(md) {
+    @include mq(lg) {
       display: none;
     }
   }

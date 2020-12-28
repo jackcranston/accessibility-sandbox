@@ -68,7 +68,6 @@ class MegaMenu {
 
     if (device === 'MOBILE') {
       this.megaMenuTriggerLink.addEventListener('click', this.megaMenuInteraction);
-
       this.megaMenuTrigger.removeEventListener('mouseenter', this.megaMenuInteraction);
       this.megaMenuTrigger.removeEventListener('mouseleave', this.megaMenuInteraction);
 
@@ -79,7 +78,6 @@ class MegaMenu {
       });
     } else if (device === 'DESKTOP') {
       this.megaMenuTriggerLink.removeEventListener('click', this.megaMenuInteraction);
-
       this.megaMenuTrigger.addEventListener('mouseenter', this.megaMenuInteraction);
       this.megaMenuTrigger.addEventListener('mouseleave', this.megaMenuInteraction);
 
@@ -150,7 +148,7 @@ class MegaMenu {
   }
 
   /**
-   * Handles when user hovers over menu item
+   * Handles when user hovers over menu item (DESKTOP)
    * @param {Event} event 
    */
   itemHover(event) {
@@ -180,7 +178,7 @@ class MegaMenu {
   };
 
   /**
-   * Handles when menu item is clicked
+   * Handles when menu item is clicked (MOBILE)
    * @param {Event} event 
    */
   itemClick(event) {
@@ -191,6 +189,7 @@ class MegaMenu {
     if (!nextPanel) return;
 
     if (type === 'click' && !nextPanel.classList.contains('active')) {
+      currentTarget.setAttribute('tabindex', -1);
       nextPanel.classList.add('active');
       nextPanel.setAttribute('aria-hidden', false);
       this.focusChildOfCurrent(parentItem);
@@ -244,7 +243,7 @@ class MegaMenu {
         this.focusParentOfCurrent(currentItem);
         break;
       case 'SPACE':
-        this.focusChildOfCurrent(currentItem);
+        currentItem.classList.contains('.megamenu__item--button') ? this.focusParentOfCurrent(currentItem) : this.focusChildOfCurrent(currentItem);
         break;
       case 'ESC':
         this.megaMenuClose(this.megaMenu, this.itemLists);
@@ -265,9 +264,12 @@ class MegaMenu {
   handleBackButton(event) {
     const { currentTarget } = event;
     const parentList = currentTarget.closest('.megamenu__content') || currentTarget.closest('.megamenu__items');
+    const parentLink = parentList.previousElementSibling;
 
     parentList.classList.remove('active');
     parentList.setAttribute('aria-hidden', true);
+    parentLink.removeAttribute('tabindex');
+    parentLink.focus();
 
     if (parentList.parentElement === this.megaMenu) {
       this.megaMenu.classList.remove('active');
@@ -282,8 +284,9 @@ class MegaMenu {
   focusPrevOfCurrent(currentItem) {
     if (!currentItem.previousElementSibling) return;
 
-    const prevItem = currentItem.previousElementSibling.querySelector('.megamenu__link') || currentItem.previousElementSibling;
-    prevItem.focus();
+    const prevItem = currentItem.previousElementSibling;
+    const prevLink = prevItem.firstElementChild;
+    prevLink.focus();
   };
 
   /**
@@ -293,8 +296,9 @@ class MegaMenu {
   focusNextOfCurrent(currentItem) {
     if (!currentItem.nextElementSibling) return;
 
-    const nextItem = currentItem.nextElementSibling.querySelector('.megamenu__link') || currentItem.nextElementSibling;
-    nextItem.focus();
+    const nextItem = currentItem.nextElementSibling;
+    const nextLink = nextItem.firstElementChild;
+    nextLink.focus();
   };
 
   /**
@@ -303,9 +307,10 @@ class MegaMenu {
    */
   focusFirstOfCurrent(currentItem) {
     const currentList = currentItem.closest('.megamenu__items');
-    const currentListLinks = currentList.querySelectorAll(':scope > .megamenu__item > .megamenu__link');
+    const currentListLinks = [...currentList.querySelectorAll(':scope > .megamenu__item')];
+    const targetLink = currentListLinks[0].firstElementChild;
 
-    currentListLinks[0].focus();
+    targetLink.focus();
   };
 
   /**
@@ -314,9 +319,12 @@ class MegaMenu {
    */
   focusLastOfCurrent(currentItem) {
     const currentList = currentItem.closest('.megamenu__items');
-    const currentListLinks = currentList.querySelectorAll(':scope > .megamenu__item > .megamenu__link');
-
-    currentListLinks[currentListLinks.length - 1].focus();
+    const currentListLinks = [...currentList.querySelectorAll(':scope > .megamenu__item')];
+    const device = getDevice();
+    const lastItem = device === 'MOBILE' ? 1 : 2;
+    const targetLink = currentListLinks[currentListLinks.length - lastItem].firstElementChild;
+    
+    targetLink.focus();
   };
 
   /**
@@ -329,10 +337,12 @@ class MegaMenu {
     if (!innerPanel) return;
 
     const firstInnerLink = innerPanel.querySelectorAll(':scope > .megamenu__item > .megamenu__link')[0] || innerPanel.querySelector('.button');
+    const parentLink = currentItem.querySelector('.megamenu__link');
 
     if (device === 'MOBILE') {
       innerPanel.classList.add('active');
       innerPanel.setAttribute('aria-hidden', false);
+      parentLink.setAttribute('tabindex', -1);
     }
 
     firstInnerLink.focus();
@@ -353,6 +363,7 @@ class MegaMenu {
     if (device === 'MOBILE') {
       currentOuterPanel.classList.remove('active');
       currentOuterPanel.setAttribute('aria-hidden', true);
+      firstOuterLink.removeAttribute('tabindex');
     }
 
     firstOuterLink.focus();
