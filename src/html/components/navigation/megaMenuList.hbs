@@ -2,5 +2,7 @@
   {{#each navitem.children as |item| }}
   {{> navigation/megaMenuItem item=item }}
   {{/each}}
+  <li class="megamenu__item megamenu__item--view-all"><a href="{{ navitem.href }}" class="megamenu__link"
+      role="menuitem">View all</a></li>
   <li class="megamenu__item megamenu__item--back"><button class="megamenu__back-button">Go back</button></li>
 </ul>

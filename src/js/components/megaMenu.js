@@ -32,7 +32,9 @@ class MegaMenu {
    * Makes sure all necessary elements exist
    */
   checkElements() {
-    if (!this.megaMenu || !this.megaMenuTrigger || !this.links.length || !this.itemLists.length ) false;
+    if (!this.megaMenu || !this.megaMenuTrigger || !this.megaMenuTriggerLink || !this.links.length || !this.itemLists.length || !this.backButtons.length) {
+      throw new Error('[megaMenu] could not find all required HTML elements.')
+    };
   };
 
   /**
@@ -136,9 +138,10 @@ class MegaMenu {
    * @param {Event} event 
    */
   megaMenuInteraction(event) {
-    event.stopPropagation();
     const { type } = event;
     const device = getDevice();
+
+    if (device === 'MOBILE') event.preventDefault();
 
     if ((type === 'mouseleave' || type === 'blur' || type === 'click') && this.megaMenu.classList.contains('active')) {
       this.megaMenuClose();
@@ -185,8 +188,10 @@ class MegaMenu {
     const { type, currentTarget } = event;
     const parentItem = currentTarget.closest('.megamenu__item');
     const nextPanel = parentItem.querySelector('.megamenu__items') || parentItem.querySelector('.megamenu__content');
+    const device = getDevice();
 
     if (!nextPanel) return;
+    if (device === 'MOBILE') event.preventDefault();
 
     if (type === 'click' && !nextPanel.classList.contains('active')) {
       currentTarget.setAttribute('tabindex', -1);
@@ -268,8 +273,11 @@ class MegaMenu {
 
     parentList.classList.remove('active');
     parentList.setAttribute('aria-hidden', true);
-    parentLink.removeAttribute('tabindex');
-    parentLink.focus();
+
+    if (parentLink) {
+      parentLink.removeAttribute('tabindex');
+      parentLink.focus();
+    }
 
     if (parentList.parentElement === this.megaMenu) {
       this.megaMenu.classList.remove('active');

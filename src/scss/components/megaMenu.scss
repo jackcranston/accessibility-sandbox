@@ -70,6 +70,12 @@
 
   &__item {
     &--back {
+      @include mq(lg) {
+        display: none;
+      }
+    }
+
+    &--view-all {
       margin-top: auto;
 
       @include mq(lg) {
